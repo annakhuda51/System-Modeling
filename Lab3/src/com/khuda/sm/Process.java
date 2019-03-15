@@ -1,32 +1,39 @@
 package com.khuda.sm;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Process extends Element {
-
-    private int queue, maxQueue, failure;
+    private int maxQueue, failure;
+    private List<Event> queue = new ArrayList<>();
     private double averageQueue;
     private double avgLoad;
     private int numOfUnits;
-    private List<Double> nextTimes = new ArrayList<>();
+    private Map<Event, Double> nextTimes = new HashMap<>();
+    private Map<Integer, Double> averageTime = new HashMap<>();
     ChangeQueue changeQueue = null;
 
     public Process(double delay) {
         super(delay);
-        queue = 0;
+        numOfUnits = 1;
+        maxQueue = Integer.MAX_VALUE;
+        averageQueue = 0.0;
+    }
+
+    public Process() {
+        super();
         numOfUnits = 1;
         maxQueue = Integer.MAX_VALUE;
         averageQueue = 0.0;
     }
 
     @Override
-    public void inAct() {
+    public void inAct(Event event) {
         if (nextTimes.size() < numOfUnits) {
-            nextTimes.add(super.gettCurr() + super.getDelay());
+            nextTimes.put(event, super.gettCurr() +
+                    super.getDelay(averageTime.getOrDefault(event.getType(), getDelayMean())));
         } else {
-            if (getQueue() < getMaxQueue()) {
-                setQueue(getQueue() + 1);
+            if (queue.size() < getMaxQueue()) {
+                queue.add(event);
             } else {
                 failure++;
             }
@@ -38,16 +45,24 @@ public class Process extends Element {
     public void outAct() {
         super.outAct();
         double nextTime = gettNext();
-        nextTimes.remove(nextTime);
+        Event e = null;
 
-        if (getQueue() > 0) {
-            setQueue(getQueue() - 1);
-            nextTimes.add(super.gettCurr() + super.getDelay());
+        for (Map.Entry<Event, Double> i : nextTimes.entrySet()) {
+            if (e == null && i.getValue() == nextTime) {
+                e = i.getKey();
+            }
         }
+        nextTimes.remove(e);
         if (getNextElement() != null) {
-            getNextElement().inAct();
+            getNextElement().inAct(e);
         }
-        if(changeQueue != null){
+        if (!queue.isEmpty()) {
+            Event ev = chooseNextFromQueue();
+            queue.remove(ev);
+            nextTimes.put(ev, super.gettCurr() +
+                    super.getDelay(averageTime.getOrDefault(ev.getType(), getDelayMean())));
+        }
+        if (changeQueue != null) {
             changeQueue.tryChangeQueue();
         }
     }
@@ -57,26 +72,25 @@ public class Process extends Element {
         if (nextTimes.isEmpty()) {
             return Double.POSITIVE_INFINITY;
         } else {
-            return nextTimes.stream().min((a, b) -> {
-                        if (a < b) return -1;
-                        else if (a == b) return 0;
+            return nextTimes.entrySet().stream().min((a, b) -> {
+                        if (a.getValue() < b.getValue()) return -1;
+                        else if (a.getValue().equals(b.getValue())) return 0;
                         else return 1;
                     }
-            ).get();
+            ).get().getValue();
         }
+    }
+
+    public void addAverageTime(int type, double time){
+        averageTime.put(type, time);
+    }
+
+    public Event chooseNextFromQueue(){
+        return queue.get(0);
     }
 
     public int getFailure() {
         return failure;
-    }
-
-    public int getQueue() {
-        return queue;
-    }
-
-
-    public void setQueue(int queue) {
-        this.queue = queue;
     }
 
 
@@ -105,18 +119,22 @@ public class Process extends Element {
         this.changeQueue = changeQueue;
     }
 
+    public List<Event> getQueue() {
+        return queue;
+    }
+
     @Override
     public void printInfo() {
         super.printInfo();
         System.out.println("failure = " + this.getFailure());
         System.out.println("quantity = " + getQuantity());
         System.out.println("busy units = " + nextTimes.size());
-        System.out.println("queue = " + queue);
+        System.out.println("queue = " + queue.size());
     }
 
     @Override
     public void doStatistics(double delta) {
-        averageQueue += queue * delta;
+        averageQueue += queue.size() * delta;
         avgLoad += delta * nextTimes.size();
     }
 

@@ -11,16 +11,16 @@ public class MinQueueBranch extends Element {
     }
 
     @Override
-    public void inAct(){
-        super.inAct();
+    public void inAct(Event e){
+        super.inAct(e);
         Process p = choose();
-        p.inAct();
+        p.inAct(e);
     }
 
     private Process choose() {
         Process min = nextElements.get(0);
         for(int i = 0; i<nextElements.size(); i++){
-            if(nextElements.get(i).getQueue() < min.getQueue()){
+            if(nextElements.get(i).getQueue().size() < min.getQueue().size()){
                 min = nextElements.get(i);
             }
         }

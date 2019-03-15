@@ -13,13 +13,15 @@ public class ChangeQueue {
     }
 
     public void tryChangeQueue() {
-        if (p1.getQueue() - p2.getQueue() >= 2) {
-            p1.setQueue(p1.getQueue() - 1);
-            p2.setQueue(p2.getQueue() + 1);
+        if (p1.getQueue().size() - p2.getQueue().size() >= 2) {
+            Event e = p1.getQueue().get(p1.getQueue().size() - 1);
+            p1.getQueue().remove(p1.getQueue().size() - 1);
+            p2.getQueue().add(e);
             numOfChanges++;
-        } else if (p2.getQueue() - p1.getQueue() >= 2) {
-            p2.setQueue(p2.getQueue() - 1);
-            p1.setQueue(p1.getQueue() + 1);
+        } else if (p2.getQueue().size() - p1.getQueue().size() >= 2) {
+            Event e = p2.getQueue().get(p2.getQueue().size() - 1);
+            p2.getQueue().remove(p2.getQueue().size() - 1);
+            p1.getQueue().add(e);
             numOfChanges++;
         }
     }

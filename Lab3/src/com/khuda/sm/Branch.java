@@ -7,11 +7,11 @@ public class Branch extends Element {
     private Map<Element, Double> elements = new HashMap<>();
 
     @Override
-    public void inAct() {
-        super.inAct();
+    public void inAct(Event event) {
+        super.inAct(event);
         Element el = choose();
         if(el != null){
-            el.inAct();
+            el.inAct(event);
         }
     }
 

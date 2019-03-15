@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Model {
-
     private List<Element> list = new ArrayList<>();
     double tNext, tCurr;
     Element curr;
@@ -43,7 +42,7 @@ public class Model {
                     e.outAct();
                 }
             }
-           // printInfo();
+//           printInfo();
         }
         printResult();
     }

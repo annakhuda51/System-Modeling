@@ -48,21 +48,20 @@ public class Element {
         name = "element" + id;
     }
 
-    public double getDelay() {
-        double delay = getDelayMean();
+    public double getDelay(double delay) {
         if ("exp".equalsIgnoreCase(getDistribution())) {
-            delay = FunRand.Exp(getDelayMean());
+            delay = FunRand.Exp(delay);
         } else {
             if ("gauss".equalsIgnoreCase(getDistribution())) {
-                delay = FunRand.Gauss(getDelayMean(), getDelayDev());
+                delay = FunRand.Gauss(delay, getDelayDev());
             } else {
                 if ("unif".equalsIgnoreCase(getDistribution())) {
-                    delay = FunRand.Unif(getDelayMean(), getDelayDev());
+                    delay = FunRand.Unif(delay, getDelayDev());
                 } else {
                     if ("".equalsIgnoreCase(getDistribution()))
                         delay = getDelayMean();
                     else if ("erlang".equalsIgnoreCase(getDistribution())){
-                        delay = FunRand.erlangDistribution(getDelayMean(), getDelayDev());
+                        delay = FunRand.erlangDistribution(delay, getDelayDev());
                     }
                 }
             }
@@ -107,7 +106,8 @@ public class Element {
         this.nextElement = nextElement;
     }
 
-    public void inAct() {
+    public void inAct(Event event) {
+
     }
 
     public void outAct() {
